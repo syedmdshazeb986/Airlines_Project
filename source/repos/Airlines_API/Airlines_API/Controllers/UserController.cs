@@ -53,6 +53,24 @@ namespace Airlines_API.Controllers
             return BadRequest("Already exist");
                 //return Ok();
       }
+        [Route("Userlogin")]
+        public ActionResult UserLogin(UserLogin u)
+        {
+
+                var user = _context.UserDetails.FirstOrDefault(ud => ud.Email == u.Email && ud.Password == u.Password);
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                if (user == null)
+                {
+                    return BadRequest("Invalid Credentials");
+                }
+                return Ok("Login Successfull");
+
+        }
+
 
         /*[HttpPut("{id}")]
         public ActionResult Put(int id, UserDetails modifieduser)
