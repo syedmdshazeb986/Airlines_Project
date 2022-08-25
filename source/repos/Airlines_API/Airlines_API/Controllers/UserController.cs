@@ -46,33 +46,35 @@ namespace Airlines_API.Controllers
             {
                 _context.UserDetails.Add(newuser);
                 _context.SaveChanges();
-                //return CreatedAtAction("Get", new { id = newuser.UserId }, newuser);
 
                 return Ok("Registration Successful");
             }
             return BadRequest("Already exist");
                 //return Ok();
       }
+        [HttpPost]
         [Route("Userlogin")]
-        public ActionResult UserLogin(UserLogin u)
+        public ActionResult UserLogin(UserLogin login)
         {
 
-                var user = _context.UserDetails.FirstOrDefault(ud => ud.Email == u.Email && ud.Password == u.Password);
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
+                var user = _context.UserDetails.SingleOrDefault(u => u.Email == login.Email && u.Password == login.Password);
+                
                 if (user == null)
                 {
-                    return BadRequest("Invalid Credentials");
+                return NotFound("Not found ");
+
                 }
-                return Ok("Login Successfull");
+                else
+                 {
+                return Ok(user);
+
+                 }
+
 
         }
 
 
-        /*[HttpPut("{id}")]
+      [HttpPut("{id}")]
         public ActionResult Put(int id, UserDetails modifieduser)
         {
             var data = _context.UserDetails.FirstOrDefault(u =>u.UserId  == id);
@@ -101,6 +103,6 @@ namespace Airlines_API.Controllers
             _context.UserDetails.Remove(temp);
             _context.SaveChanges();
             return Ok();
-        }*/
+        }
     }
 }

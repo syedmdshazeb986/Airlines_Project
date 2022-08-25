@@ -30,6 +30,16 @@ namespace Airlines_API
             services.AddDbContext<AppDbContext>(item =>
             item.UseSqlServer(Configuration.GetConnectionString("MyConStr")));
             services.AddControllers();
+            services.AddCors(setup =>
+            {
+                setup.AddPolicy("default", options =>
+                {
+                    options.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod();
+                });
+
+
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +53,12 @@ namespace Airlines_API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+ 
+            // Cross Origin Resource Sharing Policy            
+            app.UseCors("default");
+
+
 
             app.UseAuthorization();
 
