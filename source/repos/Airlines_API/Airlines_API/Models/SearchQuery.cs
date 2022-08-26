@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 
-namespace WebAPI_Airlines.Models
+namespace Airlines_API.Models
 {
     public class SearchQuery
     {
