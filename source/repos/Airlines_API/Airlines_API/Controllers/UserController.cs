@@ -104,5 +104,32 @@ namespace Airlines_API.Controllers
             _context.SaveChanges();
             return Ok();
         }
+        
+        [HttpGet]
+        [Route("airports")]
+        public ActionResult GetAirports()
+        {
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+
+                    return BadRequest(ModelState);
+
+                }
+                var result = _context.Airports.ToList();
+
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.ToString());
+            }
+        }
     }
 }
