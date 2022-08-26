@@ -83,7 +83,7 @@ namespace Airlines_API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                var result = db.FilteredFlights.FromSqlInterpolated($"exec dbo.SP_Search_Flight {query.Booking_Type}, {query.Depart_airport_Id}, {query.Arrival_airport_Id}, {query.Departure_Time}, {query.Arrival_Time}, {query.adults},{query.childs} , {query.infants}, {query.Class_Type}");
+                var result = _context.FilteredFlights.FromSqlInterpolated($"exec dbo.SP_Search_Flight {query.Booking_Type}, {query.Depart_airport_Id}, {query.Arrival_airport_Id}, {query.Departure_Time}, {query.Arrival_Time}, {query.adults},{query.childs} , {query.infants}, {query.Class_Type}");
                 if (result != null)
                 {
                     return Ok(result);
@@ -108,7 +108,7 @@ namespace Airlines_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                var result = db.GetSeatsByFId.FromSqlInterpolated($"exec dbo.SP_Get_Seats_By_FlightId {id}");
+                var result = _context.GetSeatsByFId.FromSqlInterpolated($"exec dbo.SP_Get_Seats_By_FlightId {id}");
                 if (result != null)
                 {
                     return Ok(result);
