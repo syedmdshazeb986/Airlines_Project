@@ -15,5 +15,9 @@ namespace Airlines_API.Models
         public DbSet<UserDetails> UserDetails { get; set; }
 
         public DbSet<Admin> Admins { get; set; }
+        
+        public DbSet<Flight> Flights { get; set; }
+
+        public DbSet<Airport> Airports { get; set; }
     }
 }
