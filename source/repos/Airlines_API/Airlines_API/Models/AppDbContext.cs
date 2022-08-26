@@ -19,5 +19,9 @@ namespace Airlines_API.Models
         public DbSet<Flight> Flights { get; set; }
 
         public DbSet<Airport> Airports { get; set; }
+        
+         public DbSet<SearchData> FilteredFlights { get; set; }
+         
+        public DbSet<Seat> GetSeatsByFId { get; set; }
     }
 }
