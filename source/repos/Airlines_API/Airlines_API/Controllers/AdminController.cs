@@ -35,6 +35,79 @@ namespace Airlines_API.Controllers
             return Ok("Login Successfull");
 
         }
+        
+        [HttpGet]
+        [Route("flights")]
+        public ActionResult GetFlights()
+        {
+            try
+            {
+                List<Flight> flights = _context.Flights.ToList();
+
+                return Ok(flights);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+
+        }
+
+        [HttpPost]
+        [Route("addflight")]
+        public ActionResult AddFlight(FlightModel f)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                if (f.Departure_time > f.Arrival_time)
+                {
+                    return BadRequest("Departure time is later than Arrival Time");
+                }
+
+                var res = _context.Database.ExecuteSqlInterpolated($"exec dbo.SP_Add_Flight {f.FlightName},{f.Depart_airport_Id},{f.Arrival_airport_Id}, {f.Departure_time}, {f.Arrival_time}, {f.Economy_fare}, {f.Business_fare}");
+                if(res != 0)
+                {
+                    return Ok("Flight Added Successfully");
+                   
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed");
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        private ActionResult StatusCode(object status50)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpDelete]
+        [Route("flight/{name}")]
+        public ActionResult DeleteFlight(string name)
+        {
+
+            try
+            {
+                var result = _context.Database.ExecuteSqlInterpolated($"exec dbo.SP_Delete_Flight {name}");
+                if (result != 0)
+                {
+                    return Ok("Flight Deleted Successfully");
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
 
     }
 }
