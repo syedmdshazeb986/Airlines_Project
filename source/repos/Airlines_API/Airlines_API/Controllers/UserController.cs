@@ -72,6 +72,55 @@ namespace Airlines_API.Controllers
 
 
         }
+        
+        [HttpPost("flight/search")]
+        public ActionResult<IEnumerable<SearchData>> SearchFlight([FromBody] SearchQuery query)
+
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = db.FilteredFlights.FromSqlInterpolated($"exec dbo.SP_Search_Flight {query.Booking_Type}, {query.Depart_airport_Id}, {query.Arrival_airport_Id}, {query.Departure_Time}, {query.Arrival_Time}, {query.adults},{query.childs} , {query.infants}, {query.Class_Type}");
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                
+                 return StatusCode(StatusCodes.Status500InternalServerError, "Failed"); 
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+
+        }
+        [HttpGet("flight/{id}")]
+        public ActionResult<IEnumerable<Seat>> GetSeatsByFlightId(int id)
+        {
+
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var result = db.GetSeatsByFId.FromSqlInterpolated($"exec dbo.SP_Get_Seats_By_FlightId {id}");
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Invalid id");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+
+        }
 
 
       [HttpPut("{id}")]
