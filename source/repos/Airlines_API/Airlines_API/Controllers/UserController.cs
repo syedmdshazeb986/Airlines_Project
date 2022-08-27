@@ -39,7 +39,7 @@ namespace Airlines_API.Controllers
 
         [HttpPost]
         [Route("registration")]
-        public ActionResult Post(UserDetails newuser)
+        public ActionResult UserDetails(UserDetails newuser)
         {
             var user_exist = _context.UserDetails.FirstOrDefault(u => u.Email == newuser.Email);
             if (user_exist == null)
