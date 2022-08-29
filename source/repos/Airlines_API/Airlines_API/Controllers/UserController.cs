@@ -177,6 +177,25 @@ namespace Airlines_API.Controllers
             }
         }
         
+                //getFlightPrice
+        [HttpPost("flight/getprice")]
+        public IActionResult GetFlightPrice(GetFlightPrice Flightquery)
+        {
+            if (Flightquery.SeatType == "business")
+            {
+                var Price = _context.Flights.FirstOrDefault(p => p.FlightId == Flightquery.FlightId);
+                return Ok(Price.Business_fare);
+            }
+            else if (Flightquery.SeatType == "economy")
+            {
+                var Price = _context.Flights.FirstOrDefault(p => p.FlightId == Flightquery.FlightId);
+                return Ok(Price.Economy_fare);
+            }
+            return Ok("Invalid Input");
+        }
+
+
+        
         //book flight
         [HttpPost]
         [Route("booking")]
@@ -273,5 +292,44 @@ namespace Airlines_API.Controllers
                 return BadRequest(e.ToString());
             }
         }
+        
+                //getting bookings by ID
+        [HttpGet("getbookings/{id}")]
+        public ActionResult<IEnumerable<GetBookings>> getbookings(int id)
+        {
+
+                var  result = _context.GetBookings.FromSqlInterpolated<GetBookings>($"dbo.SP_Show_Booking {id}");
+                if (result != null)
+                {
+                    return Ok(result);
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Invalid id");
+        }
+
+        //cancellingtickets by ID
+        [HttpGet("cancelbooking/{id}")]
+        public ActionResult<BookingData> DeleteBooking(int id)
+        {
+
+            var result = _context.GettingBookingData.FromSqlInterpolated($"dbo.SP_CancelBooking {id}");
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError, "Invalid id");
+        }
+     //getting cancelled bookings by ID
+       [HttpGet("getcancelledbookings/{id}")]
+    public ActionResult<IEnumerable<GetBookings>> getcancelledbookings(int id)
+    {
+
+        var result = _context.GetBookings.FromSqlInterpolated<GetBookings>($"dbo.SP_Show_CancelledBooking {id}");
+        if (result != null)
+        {
+            return Ok(result);
+        }
+        return StatusCode(StatusCodes.Status500InternalServerError, "Invalid id");
+    }
+
     }
 }
