@@ -1,5 +1,7 @@
-﻿using Airlines_API.Models;
+using Airlines_API.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,30 +18,47 @@ namespace Airlines_API.Controllers
         {
             _context = context;
         }
-
-        [HttpGet]
-        public ActionResult<IEnumerable<UserDetails>> Get()
+        //get user details by id
+        [HttpGet("{id}")]
+        public ActionResult Get(int id)
         {
-            // var data= _context.Category.ToList();
-
-            return Ok(_context.UserDetails.ToList());
+            try
+            {
+                var user = _context.UserDetails.FirstOrDefault(u => u.UserId == id);
+                if (user != null)
+                {
+                    return Ok(user);
+                }
+                return BadRequest("User does not exist");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.ToString());
+            }
         }
 
-
-        [HttpGet("{id}")]
-        public ActionResult<UserDetails> Get(int id)
+        [HttpPost]
+        [Route("wallet/{id}")]
+        public ActionResult GetWallet(int id)
         {
-            var data = _context.UserDetails.FirstOrDefault(u => u.UserId == id);
-            if (data == null)
+            try
             {
-                return BadRequest("User has Not Registered ");
+                var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == id);
+                if (wallet != null)
+                {
+                    return Ok(wallet);
+                }
+                return BadRequest("User does not exist");
             }
-            return Ok(data);
+            catch (Exception e)
+            {
+                return BadRequest(e.ToString());
+            }
         }
 
         [HttpPost]
         [Route("registration")]
-        public ActionResult UserDetails(UserDetails newuser)
+        public ActionResult Post(UserDetails newuser)
         {
             var user_exist = _context.UserDetails.FirstOrDefault(u => u.Email == newuser.Email);
             if (user_exist == null)
@@ -73,33 +92,6 @@ namespace Airlines_API.Controllers
 
         }
         
-        [HttpPost]
-        [Route("changepassword")]
-        public ActionResult ChangePassword([FromBody] ChangePasswordModel model)
-        {
-
-            try
-            {
-                User u = db.Users.FirstOrDefault(user => user.email == model.email && user.password == model.old_password);
-                if (u == null)
-                {
-                    return BadRequest("Invalid User id");
-                }
-                var res = db.Database.ExecuteSqlInterpolated($"exec dbo.SP_Change_Password {u.user_id}, {model.new_password}");
-                if (res != 0)
-                {
-                    return Ok("Password Updated Successfully");
-                }
-                return StatusCode(StatusCodes.Status500InternalServerError, "Failed");
-
-
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.ToString());
-            }
-        }
-        
         [HttpPost("flight/search")]
         public ActionResult<IEnumerable<SearchData>> SearchFlight([FromBody] SearchQuery query)
 
@@ -124,6 +116,10 @@ namespace Airlines_API.Controllers
             }
 
         }
+
+
+        
+
         [HttpGet("flight/{id}")]
         public ActionResult<IEnumerable<Seat>> GetSeatsByFlightId(int id)
         {
@@ -176,17 +172,19 @@ namespace Airlines_API.Controllers
                 return BadRequest(e.ToString());
             }
         }
-        
-                //getFlightPrice
+
+
+
+        //getFlightPrice
         [HttpPost("flight/getprice")]
         public IActionResult GetFlightPrice(GetFlightPrice Flightquery)
         {
             if (Flightquery.SeatType == "business")
             {
-                var Price = _context.Flights.FirstOrDefault(p => p.FlightId == Flightquery.FlightId);
-                return Ok(Price.Business_fare);
+                var price = _context.Flights.FirstOrDefault(p => p.FlightId == Flightquery.FlightId);
+                return Ok(price.Business_fare);
             }
-            else if (Flightquery.SeatType == "economy")
+            else 
             {
                 var Price = _context.Flights.FirstOrDefault(p => p.FlightId == Flightquery.FlightId);
                 return Ok(Price.Economy_fare);
@@ -195,7 +193,6 @@ namespace Airlines_API.Controllers
         }
 
 
-        
         //book flight
         [HttpPost]
         [Route("booking")]
@@ -211,7 +208,7 @@ namespace Airlines_API.Controllers
 
                 }
 
-                Flight flight = _context.Flights.FirstOrDefault(f => f.FlightId == query.FlightId);
+                GetFlights flight = _context.Flights.FirstOrDefault(f => f.FlightId == query.FlightId);
                 decimal amount;
 
 
@@ -226,7 +223,7 @@ namespace Airlines_API.Controllers
                 {
                     amount = flight.Business_fare;
                 }
-                else if (query.Class_Type == "economic")
+                else if (query.Class_Type == "economy")
                 {
                     amount = flight.Economy_fare;
                 }
@@ -254,7 +251,7 @@ namespace Airlines_API.Controllers
                 {
                     return BadRequest("Invalid Payment mode");
                 }
-                List<BookingData> result = _context.GettingBookingData.FromSqlInterpolated($"exec dbo.SP_Book_Flight {query.UserId},{query.FlightId}, {query.Booking_Type}, {query.Return_Date}, {query.Passengers.FindAll(p => p.Age > 2).Count * amount},{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")}, {query.Class_Type}, {flight.Departure_time}, {query.Payment_mode}, {query.Passengers.Count}").ToList();
+                List<BookingData> result = _context.GettingBookingData.FromSqlInterpolated($"exec dbo.SP_BooKFlight {query.UserId},{query.FlightId}, {query.Booking_Type}, {query.Return_Date}, {query.Passengers.FindAll(p => p.Age > 2).Count * amount},{DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss")}, {query.Class_Type}, {flight.Departure_Time}, {query.Payment_mode}, {query.Passengers.Count}").ToList();
 
                 if (result != null && result.Count > 0)
                 {
@@ -281,7 +278,6 @@ namespace Airlines_API.Controllers
                         }
                     }
 
-
                     return Ok("Flight Booked Successfully");
 
                 }
@@ -292,8 +288,8 @@ namespace Airlines_API.Controllers
                 return BadRequest(e.ToString());
             }
         }
-        
-                //getting bookings by ID
+
+        //getting bookings by ID
         [HttpGet("getbookings/{id}")]
         public ActionResult<IEnumerable<GetBookings>> getbookings(int id)
         {
@@ -318,8 +314,34 @@ namespace Airlines_API.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError, "Invalid id");
         }
-     //getting cancelled bookings by ID
-       [HttpGet("getcancelledbookings/{id}")]
+
+       /* //cancellingtickets
+
+        [HttpDelete]
+    [Route("cancelbooking/{id}")]
+        public ActionResult DeleteBooking(int id)
+        {
+
+            try
+            {
+                var result = _context.Database.ExecuteSqlInterpolated($"exec dbo.SP_Cancel_Booking {id}");
+                if (result != 0)
+                {
+                    return Ok("Cancellation Done Successfully");
+                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Failed");
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
+        }
+       */
+
+
+    //getting cancelled bookings by ID
+    [HttpGet("getcancelledbookings/{id}")]
     public ActionResult<IEnumerable<GetBookings>> getcancelledbookings(int id)
     {
 
