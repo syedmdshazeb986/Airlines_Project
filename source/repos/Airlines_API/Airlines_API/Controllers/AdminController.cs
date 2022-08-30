@@ -42,8 +42,7 @@ namespace Airlines_API.Controllers
         {
             try
             {
-                List<Flight> flights = _context.Flights.ToList();
-
+                List<FlightModel> flights = _context.Flights.FromSqlInterpolated($"exec dbo.SP_View_All_Flight").ToList();
                 return Ok(flights);
             }
             catch (Exception ex)
@@ -52,10 +51,30 @@ namespace Airlines_API.Controllers
             }
 
         }
+        
+        [HttpGet]
+        [Route("getByFlightName/{name}")]
+        public ActionResult GetByFlightName(string name)
+        {
+            try
+            {
+                var flight = _context.Flights.FirstOrDefault(f => f.flightName == name);
+                if (flight != null)
+                {
+                    return Ok(flight);
+                }
+                return BadRequest("Flight does not exist");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.ToString());
+            }
+        }
+
 
         [HttpPost]
         [Route("addflight")]
-        public ActionResult AddFlight(FlightModel f)
+        public ActionResult AddFlight(Flight f)
         {
             try
             {
@@ -64,15 +83,15 @@ namespace Airlines_API.Controllers
                     return BadRequest(ModelState);
                 }
 
-                if (f.Departure_time > f.Arrival_time)
+                if (f.departure_time > f.arrival_time)
                 {
                     return BadRequest("Departure time is later than Arrival Time");
                 }
 
-                var res = _context.Database.ExecuteSqlInterpolated($"exec dbo.SP_Add_Flight {f.FlightName},{f.Depart_airport_Id},{f.Arrival_airport_Id}, {f.Departure_time}, {f.Arrival_time}, {f.Economy_fare}, {f.Business_fare}");
+                var res = _context.Database.ExecuteSqlInterpolated($"exec dbo.SP_Add_Flight {f.flightName},{f.depart_airport_id},{f.arrival_airport_id}, {f.departure_time}, {f.arrival_time}, {f.economy_fare}, {f.business_fare}");
                 if(res != 0)
                 {
-                    return Ok("Flight Added Successfully");
+                    return Ok(true);
                    
                 }
                 return StatusCode(StatusCodes.Status500InternalServerError, "Failed");
