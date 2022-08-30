@@ -6,35 +6,28 @@ namespace Airlines_API.Models
     public class Flight
     {
         [Key]
-        [Required]
-        public long FlightId { get; set; }
+      
 
         [Required]
-        public string FlightName { get; set; }
+        public string flightName { get; set; }
 
         [Required]
-        public long Depart_airport_id { get; set; }
+        public long depart_airport_id { get; set; }
 
         [Required]
-        public long Arrival_airport_id { get; set; }
+        public long arrival_airport_id { get; set; }
 
         [Required]
-        public Nullable<DateTime> Departure_time { get; set; }
+        public Nullable<DateTime> departure_time { get; set; }
 
         [Required]
-        public Nullable<DateTime> Arrival_time { get; set; }
+        public Nullable<DateTime> arrival_time { get; set; }
 
         [Required]
-        public decimal Economy_fare { get; set; }
+        public decimal economy_fare { get; set; }
 
         [Required]
-        public decimal Business_fare { get; set; }
-
-        [Required]
-        public int Total_Business_Seats { get; set; }
-
-        [Required]
-        public int Total_Economy_Seats { get; set; }
+        public decimal business_fare { get; set; }
 
         
 
